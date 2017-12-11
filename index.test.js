@@ -10,20 +10,20 @@ const EXCLUDE_HEADERS = ['date'];
 
 describe('request-relay', () => {
 
-  relay(`${__dirname}/fixtures/www.google.com`).forEach(test => {
-    it(test.name, () => {
+  relay(`${__dirname}/fixtures/www.google.com`).forEach(rec => {
+    it(`${rec.filename} (${rec.name})`, () => {
       // console.log(test);
-      return supertest('www.google.com')[test.request.method](test.request.path)
-        .set(test.request.headers)
-        .send(test.request.body)
+      return supertest('www.google.com')[rec.request.method](rec.request.path)
+        .set(rec.request.headers)
+        .send(rec.request.body)
 
-        .expect(test.response.statusCode)
-        .expect(test.response.body)
+        .expect(rec.response.statusCode)
+        .expect(rec.response.body)
         .expect((res) => {
-          Object.keys(test.response.headers)
+          Object.keys(rec.response.headers)
             .forEach(key => {
               if (EXCLUDE_HEADERS.indexOf(key) === -1) {
-                expect(key + ':' + res.headers[key]).to.equal(key + ':' + test.response.headers[key])
+                expect(key + ':' + res.headers[key]).to.equal(key + ':' + rec.response.headers[key])
               } else {
                 // console.log('skipping header: ', key);
               }
@@ -31,7 +31,7 @@ describe('request-relay', () => {
         })
 
         .then((res) => {
-            console.log(res);
+          console.log(res);
         })
         ;
       // return test.run()
@@ -40,5 +40,17 @@ describe('request-relay', () => {
       //   })
       //   ;
     });
+  });
+
+  it('should process single file', () => {
+    const rec = relay(`${__dirname}/fixtures/www.google.com/151193623843133264`);
+
+    return supertest('www.google.com')[rec.request.method](rec.request.path)
+      .set(rec.request.headers)
+      .send(rec.request.body)
+
+      .expect(rec.response.statusCode)
+      .expect(rec.response.body)
+      ;
   });
 });

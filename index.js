@@ -11,11 +11,11 @@ class RequestTest {
 }
 
 const toRequest = (path, filename) => {
-  const content = Replay.catalog._read(path + '/' + filename);
-  // console.log(path + '/' + filename);
+  const content = Replay.catalog._read(path);
+  // console.log(path);
   // console.log(content);
   const t = {
-    name: `${filename} (${content.request.method} ${content.request.url})`,
+    name: `${content.request.method} ${content.request.url}`,
     filename: filename,
     request: {
       path: content.request.url,
@@ -34,6 +34,11 @@ const toRequest = (path, filename) => {
 }
 
 module.exports = (path) => {
-  const filenames = fs.readdirSync(path);
-  return filenames.map(filename => toRequest(path, filename));
+  const isDirectory = fs.lstatSync(path).isDirectory();
+  if (isDirectory) {
+    const filenames = fs.readdirSync(path);
+    return filenames.map(filename => toRequest(path + '/' + filename, filename));
+  } else {
+    return toRequest(path);
+  }
 }
